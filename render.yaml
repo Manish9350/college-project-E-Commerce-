@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ecommerce-backend
+    runtime: node
+    runtimeVersion: 18
+    buildCommand: npm ci --prefix backend
+    startCommand: bash start.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"

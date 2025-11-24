@@ -11,13 +11,33 @@ cd "$(dirname "$0")" || exit 1
 
 echo "--- Render-ready start.sh: beginning ---"
 
-if command -v node >/dev/null 2>&1; then
-	echo "Node: $(node -v)    NPM: $(npm -v || echo 'npm not found')"
-else
-	echo "Warning: node not found in PATH"
+# Try to find node in common locations if not in PATH
+if ! command -v node >/dev/null 2>&1; then
+  # Try common Node.js installation paths
+  for NODE_PATH in ~/.nvm/versions/node/*/bin/node /usr/local/bin/node /usr/bin/node ~/.local/bin/node; do
+    if [ -x "$NODE_PATH" ]; then
+      export PATH="$(dirname "$NODE_PATH"):$PATH"
+      break
+    fi
+  done
 fi
 
-# Build frontend if present (handles both `frontened` and `frontend` directories)
+# If node still not found, try to use apt to install it (for Render/Railway containers)
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node not found in PATH; attempting system install..."
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update && apt-get install -y nodejs npm
+  elif command -v apt >/dev/null 2>&1; then
+    apt update && apt install -y nodejs npm
+  fi
+fi
+
+if command -v node >/dev/null 2>&1; then
+  echo "✓ Node: $(node -v)    NPM: $(npm -v 2>/dev/null || echo 'npm not found')"
+else
+  echo "✗ FATAL: Node.js not found and cannot be installed. Check your Render environment."
+  exit 1
+fi# Build frontend if present (handles both `frontened` and `frontend` directories)
 FRONT_DIR=""
 if [ -d "frontened" ]; then
 	FRONT_DIR="frontened"
