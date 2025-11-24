@@ -7,4 +7,7 @@
   publish = "dist"
 
 [context.production.environment]
+  # Ensure devDependencies are installed during Netlify build (vite is a devDependency)
+  NPM_CONFIG_PRODUCTION = "false"
+  # Keep NODE_ENV for the build/runtime if you want production behavior
   NODE_ENV = "production"
