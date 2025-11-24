@@ -1,156 +1,191 @@
-const express = require('express');
-const Product = require('../models/Product');
-const auth = require('../middleware/auth');
+const express = require("express");
+const Product = require("../models/Product");
+const sampleProducts = require("../sampleData");
+const auth = require("../middleware/auth");
 const router = express.Router();
 
 // Get all products with filtering and pagination
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const { 
-      category, 
-      brand, 
-      minPrice, 
-      maxPrice, 
-      search, 
-      page = 1, 
+    const {
+      category,
+      brand,
+      minPrice,
+      maxPrice,
+      search,
+      page = 1,
       limit = 12,
-      sort = 'createdAt'
+      sort = "createdAt",
     } = req.query;
 
     let query = { isActive: true };
-    
+
     // Filter by category
     if (category) {
       query.category = category;
     }
-    
+
     // Filter by brand
     if (brand) {
       query.brand = brand;
     }
-    
+
     // Price range filter
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
     }
-    
+
     // Search in name and description
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
       ];
     }
 
     const skip = (page - 1) * limit;
-    
+
     // Get products with pagination
     const products = await Product.find(query)
       .sort(sort)
       .skip(skip)
       .limit(Number(limit));
-    
+
     // Get total count for pagination
     const total = await Product.countDocuments(query);
-    
+
+    // If DB is empty, return sample products (dummy data) with same pagination/filtering
+    if (total === 0) {
+      // Filter sampleProducts similarly (basic filtering)
+      let pool = sampleProducts.filter((p) => p.isActive !== false);
+
+      if (category) pool = pool.filter((p) => p.category === category);
+      if (brand) pool = pool.filter((p) => p.brand === brand);
+      if (minPrice) pool = pool.filter((p) => p.price >= Number(minPrice));
+      if (maxPrice) pool = pool.filter((p) => p.price <= Number(maxPrice));
+      if (search) {
+        const s = search.toLowerCase();
+        pool = pool.filter((p) =>
+          (p.name + " " + p.description).toLowerCase().includes(s)
+        );
+      }
+
+      const totalDummy = pool.length;
+      const start = (page - 1) * limit;
+      const sliced = pool.slice(start, start + Number(limit)).map((p, idx) => ({
+        ...p,
+        _id: p._id || `dummy_${start + idx + 1}`,
+      }));
+
+      return res.json({
+        products: sliced,
+        totalPages: Math.ceil(totalDummy / limit),
+        currentPage: Number(page),
+        total: totalDummy,
+      });
+    }
+
     res.json({
       products,
       totalPages: Math.ceil(total / limit),
       currentPage: Number(page),
-      total
+      total,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // Get single product by ID
-router.get('/:id', async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    
+
     res.json(product);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // Create new product (Admin only)
-router.post('/', auth, async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
-    
+
     res.status(201).json(product);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating product', error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error creating product", error: error.message });
   }
 });
 
 // Update product (Admin only)
-router.put('/:id', auth, async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    
+
     res.json(product);
   } catch (error) {
-    res.status(400).json({ message: 'Error updating product', error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error updating product", error: error.message });
   }
 });
 
 // Delete product (Admin only)
-router.delete('/:id', auth, async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       { isActive: false },
       { new: true }
     );
-    
+
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    
-    res.json({ message: 'Product deleted successfully' });
+
+    res.json({ message: "Product deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // Get product categories
-router.get('/categories/all', async (req, res) => {
+router.get("/categories/all", async (req, res) => {
   try {
-    const categories = await Product.distinct('category', { isActive: true });
+    const categories = await Product.distinct("category", { isActive: true });
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
 // Get featured products
-router.get('/featured/products', async (req, res) => {
+router.get("/featured/products", async (req, res) => {
   try {
     const featuredProducts = await Product.find({ isActive: true })
-      .sort({ 'ratings.average': -1, createdAt: -1 })
+      .sort({ "ratings.average": -1, createdAt: -1 })
       .limit(8);
-    
+
     res.json(featuredProducts);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

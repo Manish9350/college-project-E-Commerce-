@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import { gsap } from 'gsap';
-import styled from 'styled-components';
-import toast from 'react-hot-toast';
-import { useApp } from '../context/AppContext';
+import React, { useState, useEffect, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { gsap } from "gsap";
+import styled from "styled-components";
+import toast from "react-hot-toast";
+import { useApp } from "../context/AppContext";
 
 const AuthContainer = styled.div`
   min-height: 100vh;
@@ -18,7 +18,7 @@ const AuthContainer = styled.div`
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -29,8 +29,12 @@ const AuthContainer = styled.div`
   }
 
   @keyframes float {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    100% { transform: translate(-50px, -50px) rotate(360deg); }
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+      transform: translate(-50px, -50px) rotate(360deg);
+    }
   }
 `;
 
@@ -39,16 +43,14 @@ const AuthCard = styled.div`
   backdrop-filter: blur(10px);
   padding: 50px 40px;
   border-radius: 20px;
-  box-shadow: 
-    0 20px 40px rgba(0,0,0,0.1),
-    0 0 0 1px rgba(255,255,255,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1);
   width: 100%;
   max-width: 450px;
   position: relative;
   overflow: hidden;
-  
+
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -71,7 +73,7 @@ const InputGroup = styled.div`
 const Input = styled.input`
   width: 100%;
   padding: 16px 20px;
-  border: 2px solid ${props => props.error ? '#e74c3c' : '#e1e5e9'};
+  border: 2px solid ${(props) => (props.error ? "#e74c3c" : "#e1e5e9")};
   border-radius: 12px;
   font-size: 16px;
   background: rgba(255, 255, 255, 0.8);
@@ -115,7 +117,7 @@ const Button = styled.button`
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -149,7 +151,7 @@ const Divider = styled.div`
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     flex: 1;
     height: 1px;
     background: #e1e5e9;
@@ -179,7 +181,7 @@ const SocialButton = styled.button`
   &:hover {
     border-color: #667eea;
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -200,7 +202,11 @@ const ForgotPassword = styled(Link)`
 `;
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -208,39 +214,42 @@ const Login = () => {
   const cardRef = useRef();
 
   // Get redirect path from location state or default to home
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || "/";
 
   useEffect(() => {
     // Enhanced animation for login page
     const tl = gsap.timeline();
-    
+
     // Background animation
-    tl.fromTo('.auth-bg', 
+    tl.fromTo(
+      ".auth-bg",
       { scale: 1.2, opacity: 0 },
       { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }
     );
-    
+
     // Card animation
-    tl.fromTo(cardRef.current,
-      { 
-        opacity: 0, 
-        y: 50, 
+    tl.fromTo(
+      cardRef.current,
+      {
+        opacity: 0,
+        y: 50,
         scale: 0.9,
-        rotationX: 10 
+        rotationX: 10,
       },
-      { 
-        opacity: 1, 
-        y: 0, 
+      {
+        opacity: 1,
+        y: 0,
         scale: 1,
-        rotationX: 0, 
-        duration: 1, 
-        ease: "back.out(1.7)" 
+        rotationX: 0,
+        duration: 1,
+        ease: "back.out(1.7)",
       },
       "-=0.5"
     );
 
     // Input animations
-    tl.fromTo('.form-input',
+    tl.fromTo(
+      ".form-input",
       { opacity: 0, x: -20 },
       { opacity: 1, x: 0, stagger: 0.1, duration: 0.6 },
       "-=0.3"
@@ -250,41 +259,41 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/auth/login', data);
+      const response = await axios.post("/api/auth/login", data);
       const { token, user } = response.data;
 
       // Store token and user data
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
       // Set default authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
       // Update global state
-      dispatch({ type: 'SET_USER', payload: user });
-      
+      dispatch({ type: "SET_USER", payload: user });
+
       // Show success message
       toast.success(`Welcome back, ${user.name}!`, {
-        icon: '👋',
+        icon: "👋",
         style: {
-          background: '#4CAF50',
-          color: 'white',
+          background: "#4CAF50",
+          color: "white",
         },
       });
 
       // Redirect to previous page or home
       navigate(from, { replace: true });
-      
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
-      
+      const errorMessage =
+        error.response?.data?.message || "Login failed. Please try again.";
+
       toast.error(errorMessage, {
         style: {
-          background: '#e74c3c',
-          color: 'white',
+          background: "#e74c3c",
+          color: "white",
         },
       });
-      
+
       // Shake animation on error
       if (cardRef.current) {
         gsap.to(cardRef.current, {
@@ -292,7 +301,7 @@ const Login = () => {
           duration: 0.1,
           yoyo: true,
           repeat: 5,
-          ease: "power1.inOut"
+          ease: "power1.inOut",
         });
       }
     } finally {
@@ -303,10 +312,10 @@ const Login = () => {
   const handleDemoLogin = () => {
     // Auto-fill demo credentials
     const demoCredentials = {
-      email: 'demo@example.com',
-      password: 'demo123'
+      email: "demo@example.com",
+      password: "demo123",
     };
-    
+
     // You can submit these directly or pre-fill the form
     onSubmit(demoCredentials);
   };
@@ -315,20 +324,24 @@ const Login = () => {
     <AuthContainer className="auth-bg">
       <AuthCard ref={cardRef}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ 
-            margin: '0 0 10px 0', 
-            color: '#2d3748', 
-            fontSize: '28px',
-            fontWeight: '700'
-          }}>
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <h2
+            style={{
+              margin: "0 0 10px 0",
+              color: "#2d3748",
+              fontSize: "28px",
+              fontWeight: "700",
+            }}
+          >
             Welcome Back
           </h2>
-          <p style={{ 
-            margin: 0, 
-            color: '#718096', 
-            fontSize: '16px' 
-          }}>
+          <p
+            style={{
+              margin: 0,
+              color: "#718096",
+              fontSize: "16px",
+            }}
+          >
             Sign in to your account to continue
           </p>
         </div>
@@ -340,19 +353,17 @@ const Login = () => {
               type="email"
               placeholder="Enter your email"
               className="form-input"
-              {...register('email', { 
-                required: 'Email is required',
+              {...register("email", {
+                required: "Email is required",
                 pattern: {
                   value: /^\S+@\S+$/i,
-                  message: 'Please enter a valid email address'
-                }
+                  message: "Please enter a valid email address",
+                },
               })}
               error={errors.email}
             />
             {errors.email && (
-              <ErrorMessage>
-                📧 {errors.email.message}
-              </ErrorMessage>
+              <ErrorMessage>📧 {errors.email.message}</ErrorMessage>
             )}
           </InputGroup>
 
@@ -362,19 +373,17 @@ const Login = () => {
               type="password"
               placeholder="Enter your password"
               className="form-input"
-              {...register('password', { 
-                required: 'Password is required',
+              {...register("password", {
+                required: "Password is required",
                 minLength: {
                   value: 6,
-                  message: 'Password must be at least 6 characters'
-                }
+                  message: "Password must be at least 6 characters",
+                },
               })}
               error={errors.password}
             />
             {errors.password && (
-              <ErrorMessage>
-                🔒 {errors.password.message}
-              </ErrorMessage>
+              <ErrorMessage>🔒 {errors.password.message}</ErrorMessage>
             )}
           </InputGroup>
 
@@ -387,12 +396,12 @@ const Login = () => {
           <Button type="submit" disabled={isLoading}>
             {isLoading ? (
               <>
-                <span style={{ marginRight: '8px' }}>⏳</span>
+                <span style={{ marginRight: "8px" }}>⏳</span>
                 Signing In...
               </>
             ) : (
               <>
-                <span style={{ marginRight: '8px' }}>🔑</span>
+                <span style={{ marginRight: "8px" }}>🔑</span>
                 Sign In
               </>
             )}
@@ -404,13 +413,23 @@ const Login = () => {
           </Divider>
 
           {/* Demo Login Button */}
-          <SocialButton type="button" onClick={handleDemoLogin} disabled={isLoading}>
+          <SocialButton
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={isLoading}
+          >
             <span>🎮</span>
             Try Demo Account
           </SocialButton>
 
           {/* Social Login Buttons */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "10px",
+            }}
+          >
             <SocialButton type="button">
               <span>📘</span>
               Facebook
@@ -423,42 +442,66 @@ const Login = () => {
         </Form>
 
         {/* Sign Up Link */}
-        <div style={{ 
-          textAlign: 'center', 
-          marginTop: '30px', 
-          paddingTop: '20px', 
-          borderTop: '1px solid #e1e5e9' 
-        }}>
-          <p style={{ margin: 0, color: '#718096' }}>
-            Don't have an account?{' '}
-            <Link 
-              to="/register" 
-              style={{ 
-                color: '#667eea', 
-                fontWeight: '600',
-                textDecoration: 'none'
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: "30px",
+            paddingTop: "20px",
+            borderTop: "1px solid #e1e5e9",
+          }}
+        >
+          <p style={{ margin: 0, color: "#718096" }}>
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              style={{
+                color: "#667eea",
+                fontWeight: "600",
+                textDecoration: "none",
               }}
               state={{ from: location.state?.from }}
             >
               Sign up
             </Link>
           </p>
+          <p
+            style={{ margin: "8px 0 0 0", color: "#718096", fontSize: "14px" }}
+          >
+            Are you an admin?{" "}
+            <Link
+              to="/admin/login"
+              style={{ color: "#667eea", fontWeight: "600" }}
+            >
+              Admin Login
+            </Link>{" "}
+            or{" "}
+            <Link
+              to="/admin/register"
+              style={{ color: "#667eea", fontWeight: "600" }}
+            >
+              Admin Register
+            </Link>
+          </p>
         </div>
 
         {/* Demo Credentials Hint */}
-        <div style={{ 
-          marginTop: '20px',
-          padding: '15px',
-          background: 'rgba(102, 126, 234, 0.1)',
-          borderRadius: '10px',
-          textAlign: 'center'
-        }}>
-          <p style={{ 
-            margin: 0, 
-            fontSize: '12px', 
-            color: '#667eea',
-            fontWeight: '500'
-          }}>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "15px",
+            background: "rgba(102, 126, 234, 0.1)",
+            borderRadius: "10px",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: "12px",
+              color: "#667eea",
+              fontWeight: "500",
+            }}
+          >
             💡 Demo: demo@example.com / demo123
           </p>
         </div>

@@ -1,24 +1,33 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { gsap } from 'gsap';
-import { AppProvider } from './context/AppContext';
-import { Toaster } from 'react-hot-toast'; 
-import styled, { createGlobalStyle } from 'styled-components';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { gsap } from "gsap";
+import { AppProvider } from "./context/AppContext";
+import { Toaster } from "react-hot-toast";
+import styled, { createGlobalStyle } from "styled-components";
 
 // Components
-import Navbar from './components/Layout/Navbar';
-import Footer from './components/Layout/Footer';
-import Cart from './components/Cart/Cart';
+import Navbar from "./components/Layout/Navbar";
+import Footer from "./components/Layout/Footer";
+import Cart from "./components/Cart/Cart";
 
 // Pages
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
-import Orders from './pages/Orders';
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
+import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
+import Orders from "./pages/Orders";
+import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
+import AdminRegister from "./pages/AdminRegister";
+import AdminProfile from "./pages/AdminProfile";
 
 // Global Styles
 const GlobalStyle = createGlobalStyle`
@@ -31,7 +40,9 @@ const GlobalStyle = createGlobalStyle`
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     background-color: #f8fafc;
-    color: #334155;
+    color: #334155;💡 Demo: demo@example.com / demo123
+
+
     line-height: 1.6;
   }
 
@@ -80,13 +91,20 @@ const MainContent = styled.main`
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" />;
+};
+
+const ProtectedAdminRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (!user) return <Navigate to="/login" />;
+  if (!user.isAdmin) return <Navigate to="/" />;
+  return children;
 };
 
 // Public Route Component (redirect to home if already logged in)
 const PublicRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return !token ? children : <Navigate to="/" />;
 };
 
@@ -102,9 +120,10 @@ function App() {
 
     // Smooth page entrance animation
     const tl = gsap.timeline();
-    tl.fromTo('body', 
+    tl.fromTo(
+      "body",
       { opacity: 0 },
-      { opacity: 1, duration: 0.5, ease: 'power2.out' }
+      { opacity: 1, duration: 0.5, ease: "power2.out" }
     );
   }, []);
 
@@ -123,98 +142,124 @@ function App() {
       <Router>
         <AppContainer>
           <Navbar onCartToggle={handleCartToggle} />
-          
+
           <MainContent>
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
-              
+
               {/* Auth Routes (only for non-logged in users) */}
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
                   <PublicRoute>
                     <Login />
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/register" 
+              <Route
+                path="/register"
                 element={
                   <PublicRoute>
                     <Register />
                   </PublicRoute>
-                } 
+                }
               />
-              
+
               {/* Protected Routes */}
-              <Route 
-                path="/checkout" 
+              <Route
+                path="/checkout"
                 element={
                   <ProtectedRoute>
                     <Checkout />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/profile" 
+              <Route
+                path="/profile"
                 element={
                   <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/orders" 
+              <Route
+                path="/orders"
                 element={
                   <ProtectedRoute>
                     <Orders />
                   </ProtectedRoute>
-                } 
+                }
               />
-              
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedAdminRoute>
+                    <Admin />
+                  </ProtectedAdminRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <ProtectedAdminRoute>
+                    <Admin />
+                  </ProtectedAdminRoute>
+                }
+              />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/register" element={<AdminRegister />} />
+              <Route
+                path="/admin/profile"
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminProfile />
+                  </ProtectedAdminRoute>
+                }
+              />
+
               {/* 404 Route */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </MainContent>
 
           <Footer />
-          
+
           {/* Cart Sidebar */}
           <Cart isOpen={isCartOpen} onClose={handleCartClose} />
-          
+
           {/* Toast Notifications - Fixed import */}
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#363636',
-                color: '#fff',
-                borderRadius: '10px',
-                fontSize: '14px',
-                fontWeight: '500',
+                background: "#363636",
+                color: "#fff",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: "500",
               },
               success: {
                 style: {
-                  background: '#10b981',
-                  color: 'white',
+                  background: "#10b981",
+                  color: "white",
                 },
                 iconTheme: {
-                  primary: 'white',
-                  secondary: '#10b981',
+                  primary: "white",
+                  secondary: "#10b981",
                 },
               },
               error: {
                 style: {
-                  background: '#ef4444',
-                  color: 'white',
+                  background: "#ef4444",
+                  color: "white",
                 },
                 iconTheme: {
-                  primary: 'white',
-                  secondary: '#ef4444',
+                  primary: "white",
+                  secondary: "#ef4444",
                 },
               },
             }}

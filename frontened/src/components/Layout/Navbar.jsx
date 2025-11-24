@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { gsap } from 'gsap';
-import styled from 'styled-components';
-import { useApp } from '../../context/AppContext';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { gsap } from "gsap";
+import styled from "styled-components";
+import { useApp } from "../../context/AppContext";
 
 const NavbarContainer = styled.nav`
   position: fixed;
@@ -30,7 +30,7 @@ const Logo = styled(Link)`
   font-weight: 700;
   color: #667eea;
   text-decoration: none;
-  
+
   &:hover {
     color: #764ba2;
   }
@@ -42,7 +42,8 @@ const NavLinks = styled.div`
   gap: 30px;
 
   @media (max-width: 768px) {
-    display: ${props => props.$isOpen ? 'flex' : 'none'}; // Changed to $isOpen
+    display: ${(props) =>
+      props.$isOpen ? "flex" : "none"}; // Changed to $isOpen
     position: absolute;
     top: 100%;
     left: 0;
@@ -65,7 +66,7 @@ const NavLink = styled(Link)`
   }
 
   &.active::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -5px;
     left: 0;
@@ -190,18 +191,19 @@ const Navbar = ({ onCartToggle }) => {
 
   useEffect(() => {
     // Navbar entrance animation
-    gsap.fromTo('.navbar', 
+    gsap.fromTo(
+      ".navbar",
       { y: -100, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: 'power3.out' }
+      { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
     );
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    dispatch({ type: 'SET_USER', payload: null });
-    dispatch({ type: 'CLEAR_CART' });
-    navigate('/');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    dispatch({ type: "SET_USER", payload: null });
+    dispatch({ type: "CLEAR_CART" });
+    navigate("/");
     setMobileMenuOpen(false); // Close mobile menu on logout
   };
 
@@ -216,7 +218,7 @@ const Navbar = ({ onCartToggle }) => {
   };
 
   const getUserInitial = () => {
-    return user?.name?.charAt(0)?.toUpperCase() || 'U';
+    return user?.name?.charAt(0)?.toUpperCase() || "U";
   };
 
   const handleNavLinkClick = () => {
@@ -226,16 +228,36 @@ const Navbar = ({ onCartToggle }) => {
   return (
     <NavbarContainer className="navbar">
       <NavContent>
-        <Logo to="/" onClick={handleNavLinkClick}>Shoplify</Logo>
+        <Logo to="/" onClick={handleNavLinkClick}>
+          Shoplify
+        </Logo>
 
         {/* Use $isOpen instead of isOpen for styled-components */}
         <NavLinks $isOpen={mobileMenuOpen}>
-          <NavLink to="/" onClick={handleNavLinkClick}>Home</NavLink>
-          <NavLink to="/products" onClick={handleNavLinkClick}>Products</NavLink>
-          {user && <NavLink to="/orders" onClick={handleNavLinkClick}>Orders</NavLink>}
+          <NavLink to="/" onClick={handleNavLinkClick}>
+            Home
+          </NavLink>
+          <NavLink to="/products" onClick={handleNavLinkClick}>
+            Products
+          </NavLink>
+          {user && (
+            <NavLink to="/orders" onClick={handleNavLinkClick}>
+              Orders
+            </NavLink>
+          )}
+          {user?.isAdmin && (
+            <NavLink to="/admin" onClick={handleNavLinkClick}>
+              Admin
+            </NavLink>
+          )}
+          {user?.isAdmin && (
+            <NavLink to="/admin/orders" onClick={handleNavLinkClick}>
+              Admin Orders
+            </NavLink>
+          )}
         </NavLinks>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <CartButton onClick={onCartToggle}>
             🛒
             {cartItemCount > 0 && <CartCount>{cartItemCount}</CartCount>}
@@ -244,27 +266,36 @@ const Navbar = ({ onCartToggle }) => {
           {user ? (
             <UserMenu>
               <NavLink to="/profile" onClick={handleNavLinkClick}>
-                <UserAvatar>
-                  {getUserInitial()}
-                </UserAvatar>
+                <UserAvatar>{getUserInitial()}</UserAvatar>
               </NavLink>
-              <LogoutButton onClick={handleLogout}>
-                Logout
-              </LogoutButton>
+              {user?.isAdmin && (
+                <NavLink to="/admin/profile" onClick={handleNavLinkClick}>
+                  Admin Profile
+                </NavLink>
+              )}
+              <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
             </UserMenu>
           ) : (
             <AuthSection>
-              <AuthButton to="/login" className="login" onClick={handleNavLinkClick}>
+              <AuthButton
+                to="/login"
+                className="login"
+                onClick={handleNavLinkClick}
+              >
                 Login
               </AuthButton>
-              <AuthButton to="/register" className="register" onClick={handleNavLinkClick}>
+              <AuthButton
+                to="/register"
+                className="register"
+                onClick={handleNavLinkClick}
+              >
                 Sign Up
               </AuthButton>
             </AuthSection>
           )}
 
           <MobileMenuButton onClick={toggleMobileMenu}>
-            {mobileMenuOpen ? '✕' : '☰'}
+            {mobileMenuOpen ? "✕" : "☰"}
           </MobileMenuButton>
         </div>
       </NavContent>
