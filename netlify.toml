@@ -1,0 +1,10 @@
+[build]
+  # Build in the existing frontend folder (this repo uses `frontened`)
+  base = "frontened"
+  # Run the frontend build command defined in frontened/package.json
+  command = "npm run build"
+  # Publish the generated Vite build output (relative to `base`)
+  publish = "dist"
+
+[context.production.environment]
+  NODE_ENV = "production"
