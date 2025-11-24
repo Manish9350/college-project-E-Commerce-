@@ -1,0 +1,17 @@
+{
+  "name": "ecommerce-app",
+  "version": "1.0.0",
+  "description": "E-Commerce application with React frontend and Express backend",
+  "main": "backend/server.js",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "bash start.sh",
+    "build": "echo 'Build complete'",
+    "dev": "cd backend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

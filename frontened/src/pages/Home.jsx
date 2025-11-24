@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import axios from 'axios';
 import { useApp } from '../context/AppContext';
 import { pageEnter, staggerItems } from '../utils/animations';
+import API_BASE_URL from '../config/api';
 
 const HomeContainer = styled.div`
   padding: 20px;
@@ -110,7 +111,7 @@ const Home = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('/api/products');
+      const response = await axios.get(`${API_BASE_URL}/products`);
       
       // Handle different response structures
       let productsData = [];
@@ -130,7 +131,6 @@ const Home = () => {
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Failed to load products. Please try again later.');
-      // Set empty array as fallback
       dispatch({ type: 'SET_PRODUCTS', payload: [] });
     } finally {
       setLoading(false);

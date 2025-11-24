@@ -27,6 +27,10 @@ app.get("/api/health", (req, res) => {
   res.json({ message: "Server is running!" });
 });
 
+app.get('/', (req, res) => {
+   res.send('Welcome to my ecommerce platform backend.....')
+})
+
 // Serve frontend static files if available (built dist in ../frontened/dist)
 const frontendDist = path.join(__dirname, "..", "frontened", "dist");
 if (fs.existsSync(frontendDist)) {

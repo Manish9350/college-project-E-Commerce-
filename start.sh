@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Building frontend..."
-cd frontened
-npm ci
-npm run build
+cd "$(dirname "$0")" || exit 1
 
-echo "Starting backend..."
-cd ../backend
-npm ci
+echo "=== Starting E-Commerce Backend ==="
 
-# If dist exists, backend will serve the frontend (server.js patched to do so)
-node server.js
+# Note: Backend dependencies already installed via Procfile release phase
+# Frontend is deployed separately on Netlify
+
+echo "🚀 Starting server..."
+cd backend
+exec node server.js
+
